@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# curl -fsSLO https://bitbucket.org/softvisio/utserver/raw/master/utserver && chmod +x utserver
+
+set -e
+
+SCRIPT_DIR="$(cd -P -- "$(dirname -- "$0")" && pwd -P)"
+
+export TAG=latest
+export NAME=utserver
+export DOCKERHUB_NAMESPACE=softvisio
+export SERVICE=1
+export CONTAINER_NAME=
+
+# docker container restart policy, https://docs.docker.com/config/containers/start-containers-automatically/
+export RESTART=unless-stopped
+
+# seconds to wait for stop before killing container, https://docs.docker.com/engine/reference/commandline/stop/#options
+export KILL_TIMEOUT=600
+
+export DOCKER_CONTAINER_ARGS="
+    -v $SCRIPT_DIR/autoload:/var/local/utserver/autoload \
+    -v $SCRIPT_DIR/data:/var/local/utserver/data \
+    -v utserver:/var/local/utserver/settings \
+    -p 6880:8080 \
+    -p 6881:6881 \
+    -p 6881:6881/udp \
+    --init \
+"
+
+curl -fsSL https://bitbucket.org/softvisio/scripts/raw/master/docker.sh | /bin/bash -s -- "$@"
